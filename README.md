@@ -28,7 +28,7 @@ curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access
 
 If you are running multiple services, replace {service} with your service name and run:
 ```bash
-curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{service}-{project}.appspot.com/_artisan/call
+curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{service}-dot-{project}.appspot.com/_artisan/call
 ```
 
 ## Using queues
@@ -45,5 +45,5 @@ curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access
 ```
 or
 ```bash
-curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{service}-{project}.appspot.com/_artisan/queue
+curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{service}-dot-{project}.appspot.com/_artisan/queue
 ```
