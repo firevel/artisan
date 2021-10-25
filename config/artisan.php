@@ -6,8 +6,8 @@ return [
         'prefix' => '_artisan',
     ],
 
-    // Token used for authentication.
-    'token_header' => 'x-GCP-token',
+    // Header used for requesr authorization.
+    'authorization_header' => 'Authorization',
 
     // Queue connection.
     'connection' => env('ARTISAN_CONNECTION', env('QUEUE_CONNECTION', 'cloudtasks')),

@@ -113,11 +113,11 @@ class ArtisanRequest extends FormRequest
      */
     public function getToken()
     {
-        if (config('artisan.token_header') == 'Authorization' && ! empty($this->bearerToken())) {
+        if (config('artisan.authorization_header') == 'Authorization' && ! empty($this->bearerToken())) {
             return $this->bearerToken();
         }
 
-        return $this->header(config('artisan.token_header'));
+        return $this->header(config('artisan.authorization_header'));
     }
 
     /**
