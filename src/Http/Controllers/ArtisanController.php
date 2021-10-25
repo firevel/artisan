@@ -3,7 +3,7 @@
 namespace Firevel\Artisan\Http\Controllers;
 
 use Illuminate\Support\Facades\Artisan;
-use App\Http\Requests\ArtisanRequest;
+use Firevel\Artisan\Http\Requests\ArtisanRequest;
 use Illuminate\Routing\Controller;
 
 class ArtisanController extends Controller

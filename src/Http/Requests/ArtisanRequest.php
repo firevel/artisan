@@ -39,7 +39,7 @@ class ArtisanRequest extends FormRequest
      *
      * @var string
      */
-    protected $appEngineCronHeader = 'X-Appengine-Cron';
+    protected $appEngineCronHeader = 'x-appengine-cron';
 
     /**
      * Project resource manager endpoint.
@@ -75,11 +75,11 @@ class ArtisanRequest extends FormRequest
         }
 
         // If not AppEngine Cron or Cloud Scheduler - proceed with Access Token Verification
-        if (empty($this->bearerToken())) {
+        if (empty($this->getToken())) {
             return false;
         }
 
-        return $this->verifyAccessToken($this->bearerToken());
+        return $this->verifyAccessToken($this->getToken());
     }
 
     /**
@@ -104,6 +104,20 @@ class ArtisanRequest extends FormRequest
         );
 
         return ! empty(json_decode($response->getBody(), true));
+    }
+
+    /**
+     * Get identity token.
+     *
+     * @return string
+     */
+    public function getToken()
+    {
+        if (config('artisan.authorization_header') == 'Authorization' && ! empty($this->bearerToken())) {
+            return $this->bearerToken();
+        }
+
+        return $this->header(config('artisan.authorization_header'));
     }
 
     /**
