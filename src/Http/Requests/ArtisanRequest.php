@@ -10,6 +10,8 @@ use Google\Auth\AccessToken;
 
 class ArtisanRequest extends FormRequest
 {
+    const GOOGLE_OAUTH_CERTS = 'https://www.googleapis.com/oauth2/v3/certs';
+
     /**
      * AppEngine IPs.
      *
@@ -100,7 +102,7 @@ class ArtisanRequest extends FormRequest
     public function verifyJwtToken($token)
     {
         // Fetch Google's public keys
-        $publicKeysJson = file_get_contents('https://www.googleapis.com/oauth2/v3/certs');
+        $publicKeysJson = file_get_contents(self::GOOGLE_OAUTH_CERTS);
         $publicKeys = JWK::parseKeySet(json_decode($publicKeysJson, true));
 
         // Verify the ID token
