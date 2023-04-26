@@ -3,6 +3,8 @@
 namespace Firevel\Artisan\Http\Requests;
 
 use Exception;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
 use Illuminate\Foundation\Http\FormRequest;
 use Google\Auth\AccessToken;
 
@@ -74,12 +76,72 @@ class ArtisanRequest extends FormRequest
             }
         }
 
-        // If not AppEngine Cron or Cloud Scheduler - proceed with Access Token Verification
-        if (empty($this->getToken())) {
+        $token = $this->getToken();
+
+        if (empty($token)) {
             return false;
         }
 
+        // Check if token is JWT.
+        if ($this->isValidJwt($token)) {
+            return $this->verifyJwtToken($token);
+        }
+
+        // If not AppEngine Cron or Cloud Scheduler - proceed with Access Token Verification
         return $this->verifyAccessToken($this->getToken());
+    }
+
+    /**
+     * Veritfy if JWT token is authorized.
+     *
+     * @param  string  $token
+     * @return bool
+     */
+    public function verifyJwtToken($token)
+    {
+        // Fetch Google's public keys
+        $publicKeysJson = file_get_contents('https://www.googleapis.com/oauth2/v3/certs');
+        $publicKeys = JWK::parseKeySet(json_decode($publicKeysJson, true));
+
+        // Verify the ID token
+        try {
+            $decodedToken = JWT::decode($token, $publicKeys, ['RS256']);
+            $email = $decodedToken->email;
+
+            if (empty($email)) {
+                return false;
+            }
+
+            return in_array($email, config('artisan.authorized_service_accounts', []));
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Is string a valid Jwt.
+     *
+     * @param  string  $jwtString
+     * @return boolean
+     */
+    public function isValidJwt($jwtString) {
+        $jwtParts = explode('.', $jwtString);
+
+        if (count($jwtParts) !== 3) {
+            return false;
+        }
+
+        try {
+            $header = JWT::urlsafeB64Decode($jwtParts[0]);
+            $payload = JWT::urlsafeB64Decode($jwtParts[1]);
+
+            $headerDecoded = json_decode($header);
+            $payloadDecoded = json_decode($payload);
+
+            return $headerDecoded !== null && $payloadDecoded !== null;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**
