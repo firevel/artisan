@@ -53,7 +53,16 @@ curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access
 You can use this package to run commands using Cloud Scheduler.
 
 ### Cloud Run
-Add a job via the [Cloud Scheduler](https://console.cloud.google.com/cloudscheduler) page in the Google Cloud console. To begin, select the Target Type as `HTTP`, followed by specifying the URL field as `https://{APP_URL}/_artisan/call`, method `POST`, and the appropriate artisan command in the Body field (e.g., `route:cache`). For the Auth header, select "Add OICD token", and for the service account, select the default App Engine account. If you prefer to use a different service account, you will need to add the service account email to the configuration file under `artisan.authorized_service_accounts`.
+Add a job via the [Cloud Scheduler](https://console.cloud.google.com/cloudscheduler) page in the Google Cloud console. To begin, select the Target Type as `HTTP`, followed by specifying the URL field as `https://{APP_URL}/_artisan/call`, method `POST`, and the appropriate artisan command in the Body field (e.g., `route:cache`). For the Auth header, select "Add OICD token", and for the service account, select the default App Engine account. If you prefer to use a different service account, you will need to add the service account email to the configuration file under `artisan.authorized_service_accounts`. 
+
+Default `artisan.authorized_service_accounts` is:
+```
+    'authorized_service_accounts' => [
+        env('GOOGLE_CLOUD_PROJECT') . '@appspot.gserviceaccount.com',
+    ],
+```
+
+Make sure your `GOOGLE_CLOUD_PROJECT` is set if you are using default configutation.
 
 ### App Engine
 If you are using App Engine you can use standard [cron.yaml](https://cloud.google.com/appengine/docs/standard/scheduling-jobs-with-cron-yaml) file.
