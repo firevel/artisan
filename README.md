@@ -52,7 +52,8 @@ curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access
 
 [Request validation](https://github.com/firevel/artisan/blob/master/src/Http/Requests/ArtisanRequest.php) is based on:
 - `GAE_SERVICE` env variable with `x-appengine-cron`, `x-google-internal-skipadmincheck`, `x-cloudscheduler` and `x-appengine-cron` header
-- or bearer token with [testIamPermissions](https://cloud.google.com/resource-manager/reference/rest/v3/folders/testIamPermissions)
+- or [OIDC](https://developers.google.com/identity/protocols/OpenIDConnect) token validation if bearer token is JWT
+- otherwise it will validate bearer token using [testIamPermissions](https://cloud.google.com/resource-manager/reference/rest/v3/folders/testIamPermissions)
 
 ### Warning
 If you are using this package outside App Engine make sure `GAE_SERVICE` env is NOT set.
