@@ -1,6 +1,6 @@
 # Serverless Artisan
 
-Artisan support for Laravel / Firevel running on App Engine.
+Artisan support for Laravel / Firevel running on App Engine or Google Cloud Run. It can be used for remote command execution or Cloud Scheduler.
 
 ## Installation
 
@@ -48,11 +48,21 @@ or
 curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{service}-dot-{project}.appspot.com/_artisan/queue
 ```
 
+## Google Cloud Scheduler
+
+You can use this package to run commands using Cloud Scheduler.
+
+### Cloud Run
+Add a job via the [Cloud Scheduler](https://console.cloud.google.com/cloudscheduler) page in the Google Cloud console. To begin, select the Target Type as `HTTP`, followed by specifying the URL field as `https://{APP_URL}/_artisan/call`, method `POST`, and the appropriate artisan command in the Body field (e.g., `route:cache`). For the Auth header, select "Add OICD token", and for the service account, select the default App Engine account. If you prefer to use a different service account, you will need to add the service account email to the configuration file under `artisan.authorized_service_accounts`.
+
+### App Engine
+If you are using App Engine you can use standard [cron.yaml](https://cloud.google.com/appengine/docs/standard/scheduling-jobs-with-cron-yaml) file.
+
 ## Security
 
 [Request validation](https://github.com/firevel/artisan/blob/master/src/Http/Requests/ArtisanRequest.php) is based on:
 - `GAE_SERVICE` env variable with `x-appengine-cron`, `x-google-internal-skipadmincheck`, `x-cloudscheduler` and `x-appengine-cron` header
-- or [OIDC](https://developers.google.com/identity/protocols/OpenIDConnect) token validation if bearer token is JWT
+- or [OIDC](https://developers.google.com/identity/protocols/OpenIDConnect) token validation if bearer token is JWT.
 - otherwise it will validate bearer token using [testIamPermissions](https://cloud.google.com/resource-manager/reference/rest/v3/folders/testIamPermissions)
 
 ### Warning
