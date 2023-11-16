@@ -23,12 +23,12 @@ With [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) you can execu
 After replacing `{command}` with artisan command (ex.: `route:list`) and {project} with your project name you can run:
 
 ```bash
-curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{project}.appspot.com/_artisan/call
+curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Accept: application/json" https://{project}.appspot.com/_artisan/call
 ```
 
 If you are running multiple services, replace {service} with your service name and run:
 ```bash
-curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" https://{service}-dot-{project}.appspot.com/_artisan/call
+curl -X POST -d "{command}" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Accept: application/json" https://{service}-dot-{project}.appspot.com/_artisan/call
 ```
 
 ## Using queues
