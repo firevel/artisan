@@ -74,5 +74,7 @@ If you are using App Engine you can use standard [cron.yaml](https://cloud.googl
 - or [OIDC](https://developers.google.com/identity/protocols/OpenIDConnect) token validation if bearer token is JWT.
 - otherwise it will validate bearer token using [testIamPermissions](https://cloud.google.com/resource-manager/reference/rest/v3/folders/testIamPermissions)
 
+A possible weakness is sending a bearer token instead of a signature. In the event of a user entering a typo in the URL, the sensitive token may be sent to the incorrect service.
+
 ### Warning
 If you are using this package outside App Engine make sure `GAE_SERVICE` env is NOT set.
