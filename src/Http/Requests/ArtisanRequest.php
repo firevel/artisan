@@ -6,7 +6,6 @@ use Exception;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Http\FormRequest;
-use Google\Auth\AccessToken;
 
 class ArtisanRequest extends FormRequest
 {
@@ -107,7 +106,7 @@ class ArtisanRequest extends FormRequest
 
         // Verify the ID token
         try {
-            $decodedToken = JWT::decode($token, $publicKeys, ['RS256']);
+            $decodedToken = JWT::decode($token, $publicKeys);
             $email = $decodedToken->email;
 
             if (empty($email)) {
