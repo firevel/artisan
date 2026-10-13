@@ -5,7 +5,10 @@ namespace Firevel\Artisan\Http\Requests;
 use Exception;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class ArtisanRequest extends FormRequest
 {
@@ -147,24 +150,44 @@ class ArtisanRequest extends FormRequest
 
     /**
      * Verify if Google Access Token generated with "gcloud auth print-access-token" got permissions to execute call.
-     * 
+     *
+     * @param  string  $token
      * @return bool
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException when Google rejects the token (expired, revoked or malformed).
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when Google rejects the verification request for another reason.
      */
     public function verifyAccessToken($token)
     {
         $client = new \GuzzleHttp\Client();
 
-        $response = $client->request(
-            'POST',
-            $this->resourceManagerEndpoint . env('GOOGLE_CLOUD_PROJECT') . ':testIamPermissions',
-            [
-                'headers' => [
-                    'Accept'        => 'application/json',
-                    'Authorization' => 'Bearer ' . $token,
-                ],
-                'json'    => (object) ["permissions" => $this->requiredPermissions],
-            ]
-        );
+        try {
+            $response = $client->request(
+                'POST',
+                $this->resourceManagerEndpoint . env('GOOGLE_CLOUD_PROJECT') . ':testIamPermissions',
+                [
+                    'headers' => [
+                        'Accept'        => 'application/json',
+                        'Authorization' => 'Bearer ' . $token,
+                    ],
+                    'json'    => (object) ["permissions" => $this->requiredPermissions],
+                ]
+            );
+        } catch (ClientException $e) {
+            $status = $e->getResponse()->getStatusCode();
+            $body = json_decode((string) $e->getResponse()->getBody(), true);
+            $reason = $body['error']['message'] ?? $e->getResponse()->getReasonPhrase();
+
+            if ($status === 401) {
+                throw new UnauthorizedHttpException(
+                    'Bearer',
+                    'Invalid or expired access token. Run "gcloud auth print-access-token" again to get a fresh one. Google said: ' . $reason,
+                    $e
+                );
+            }
+
+            throw new HttpException($status, 'Access token verification failed. Google said: ' . $reason, $e);
+        }
 
         return ! empty(json_decode($response->getBody(), true));
     }
