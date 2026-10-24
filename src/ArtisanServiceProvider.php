@@ -2,8 +2,9 @@
 
 namespace Firevel\Artisan;
 
-use Route;
+use Firevel\Artisan\Console\Commands\RemoteArtisanCommand;
 use Illuminate\Support\ServiceProvider;
+use Route;
 
 class ArtisanServiceProvider extends ServiceProvider
 {
@@ -40,5 +41,11 @@ class ArtisanServiceProvider extends ServiceProvider
             ],
             'config'
         );
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                RemoteArtisanCommand::class,
+            ]);
+        }
     }
 }

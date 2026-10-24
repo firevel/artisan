@@ -18,7 +18,61 @@ php artisan vendor:publish --provider="Firevel\Artisan\ArtisanServiceProvider" -
 
 ## Usage
 
-With [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) you can execute artisan commands directly from your command line. Make sure your user got `cloudscheduler.jobs.run` or `appengine.runtimes.actAsAdmin` permission.
+### Remote artisan command
+
+The package ships a local helper that runs artisan on your deployed instance. It needs the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) (`gcloud`) and an account with the `cloudscheduler.jobs.run` or `appengine.runtimes.actAsAdmin` permission.
+
+```bash
+php artisan firevel:artisan route:list
+```
+
+Before anything is sent you get a summary and a confirmation prompt:
+
+```
+  Command   route:list
+  Project   my-project (GOOGLE_CLOUD_PROJECT)
+  Service   api (app.yaml)
+  Endpoint  https://api-dot-my-project.appspot.com/_artisan/call
+  Account   you@example.com (gcloud)
+
+ Run "route:list" on api-dot-my-project.appspot.com? (yes/no) [no]:
+```
+
+If you are not logged in to `gcloud` the command stops and asks you to run `gcloud auth login`.
+
+To pass options to the remote command, quote it or put it after `--`:
+
+```bash
+php artisan firevel:artisan "migrate --force"
+php artisan firevel:artisan -- migrate --force
+```
+
+The target is resolved in this order:
+
+| Value   | Order of lookup                                                                  |
+|---------|----------------------------------------------------------------------------------|
+| URL     | `--url`, then `ARTISAN_REMOTE_URL`, then built from project and service          |
+| Project | `--project`, then `GOOGLE_CLOUD_PROJECT`, then `app.yaml` `env_variables`, then `gcloud config get-value project` |
+| Service | `--service`, then `GAE_SERVICE`, then `service:` in `app.yaml`, then `default`    |
+| Token   | `--token`, then `ARTISAN_REMOTE_TOKEN`, then `gcloud auth print-access-token`     |
+
+For App Engine the host becomes `https://{project}.appspot.com` or `https://{service}-dot-{project}.appspot.com`. For Cloud Run or a custom domain set `ARTISAN_REMOTE_URL` in `.env` or pass `--url`:
+
+```bash
+php artisan firevel:artisan cache:clear --url=https://my-service-abc123-uc.a.run.app
+```
+
+Options:
+
+- `--project=` / `--service=`: pick the App Engine target explicitly (overrides `ARTISAN_REMOTE_URL`).
+- `--url=`: base URL of the app; the `/_artisan/call` path is appended for you.
+- `--token=`: use this access token instead of asking `gcloud`.
+- `--queue`: dispatch through `/_artisan/queue` instead of running synchronously.
+- `--yes` / `-y`: skip the confirmation prompt (for scripts and CI).
+
+### Using curl
+
+With the Google Cloud SDK you can also call the endpoint directly. Make sure your user got `cloudscheduler.jobs.run` or `appengine.runtimes.actAsAdmin` permission.
 
 After replacing `{command}` with artisan command (ex.: `route:list`) and {project} with your project name you can run:
 

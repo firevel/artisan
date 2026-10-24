@@ -45,4 +45,24 @@ return [
     'connection' => env('ARTISAN_CONNECTION', env('QUEUE_CONNECTION', 'cloudtasks')),
     // Queue name.
     'queue' => env('ARTISAN_QUEUE', 'artisan'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remote execution (php artisan firevel:artisan)
+    |--------------------------------------------------------------------------
+    |
+    | Defaults for the local helper command that runs artisan on a deployed
+    | instance. When `url` is empty the App Engine host is built from
+    | `project` and `service`, falling back to app.yaml and gcloud config.
+    | `token` is optional; without it the token comes from
+    | `gcloud auth print-access-token`.
+    |
+    */
+    'remote' => [
+        'url' => env('ARTISAN_REMOTE_URL'),
+        'project' => env('GOOGLE_CLOUD_PROJECT'),
+        'service' => env('GAE_SERVICE'),
+        'token' => env('ARTISAN_REMOTE_TOKEN'),
+        'timeout' => env('ARTISAN_REMOTE_TIMEOUT', 600),
+    ],
 ];
